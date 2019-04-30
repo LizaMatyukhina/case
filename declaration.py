@@ -1,4 +1,5 @@
 import random
+from ru_local import *
 
 
 class Room:
@@ -10,7 +11,7 @@ class Room:
         self.comfort = comfort
 
     def __str__(self):
-        s = 'номер '+self.number+' '+self.type+' '+self.comfort+' рассчитан на '+self.max_people+' чел'
+        s = ROOM + self.number + ' ' + self.type + ' ' + self.comfort + DESIGNED_FOR + self.max_people + PERSON
         return s
 
     def __repr__(self):
@@ -29,16 +30,16 @@ class Hotel:
     def __init__(self, occupation):
         self.occupation = occupation
 
-    def checking(self, number, date): # метод для проверки заполненности номера
+    def checking(self, number, date):
         room = self.occupation[number]
-        if room[date] == 'занято':
-            return 'занято'
+        if room[date] == BUSY:
+            return BUSY
         else:
-            return 'свободно'
+            return FREE
 
-    def taken(self, number, date, days): # метод, который занимает нужные номера
+    def taken(self, number, date, days):
         for day in range(days):
-            self.occupation[number][date+day] = 'занято'
+            self.occupation[number][date+day] = BUSY
 
     def __str__(self):
         return str(self.occupation)
@@ -68,5 +69,4 @@ class Client:
         s += self.date + ' '
         s += self.days + ' '
         s += self.max_summ
-
         return s
