@@ -23,7 +23,7 @@ def empty_hotel(rooms): # получаем пустой отель, где дл�
     return Hotel(occupation)
 
 
-def variants(rooms): # создание словаря со стоимостью БЕЗ ПИТАНИЯ
+def variants(rooms): # создание словаря со стоимостью БЕЗ ПИТАНИЯ и
     options = {}
     type_of_room = {'одноместный': 2900.0, 'двухместный': 2300.0, 'полулюкс': 3200.0, 'люкс': 4100.0}
     type_of_comfort = {'стандарт': 1.0, 'стандарт_улучшенный': 1.2, 'апартамент': 1.5}
@@ -68,29 +68,33 @@ def read_file_booking(): # считывание данных из файла п�
 
 
 def hotel_filling(sorted_rooms, clients, hotel, rooms):
+    first_date_in = clients[0].date_in
+    last_date_in = clients[len(clients)-1].date_in
     for client in clients:
         search_people = int(client.people) # количество людей в номер
         search_summ = int(client.max_summ) # максимальная стоимость
         search_date = int(client.date.split('.')[0])
         search_days = int(client.days)
-        room_res = searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, client.agreement)
-        agreement = client.agreement
-        if room_res != 0:
-            print('Поступила заявка на бронирование: ' + '\n')
-            print(client)
-            print(hotel)
-            print('Найден:')
-            for room in rooms:
-                if room.number == room_res[0][0]:
-                    print(room, end='. ')
-            print('фактически', search_people, 'чел. ', room_res[0][3], ' стоимость ', room_res[0][1]*room_res[1], ' руб./сутки')
-            if agreement:
-                print('Клиент согласен. Номер забронирован.')
+        for data in range (int(first_date_in.split('.')[0]), int(last_date_in.split('.')[0])+1):
+            while first_date_in == client.date_in
+            room_res = searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, client.agreement)
+            agreement = client.agreement
+            if room_res != 0:
+                print('Поступила заявка на бронирование: ' + '\n')
+                print(client)
+                print(hotel)
+                print('Найден:')
+                for room in rooms:
+                    if room.number == room_res[0][0]:
+                        print(room, end='. ')
+                print('фактически', search_people, 'чел. ', room_res[0][3], ' стоимость ', room_res[0][1]*room_res[1], ' руб./сутки')
+                if agreement:
+                    print('Клиент согласен. Номер забронирован.')
+                else:
+                    print('Клиент отказался!!')
+                print(hotel)
             else:
-                print('Клиент отказался!!')
-            print(hotel)
-        else:
-            print('Предложений по данному запросу нет. В бронировании отказано.')
+                print('Предложений по данному запросу нет. В бронировании отказано.')
 
 
 def searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, agreement, percent=1.0):
@@ -118,6 +122,5 @@ def main():
     clients = read_file_booking() # читаем и кладем в список экземпляры клиентов
     hotel_filling(sorted_rooms, clients, hotel, rooms)
 
-    print(sorted_rooms)
 
 main()
