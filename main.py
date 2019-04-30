@@ -2,6 +2,10 @@ from declaration import *
 
 
 def read_file_rooms(): # считывание комнат из файла и формирование элементов класса комнаты
+    single = 0
+    two_place = 0
+    half_luxe = 0
+    luxe = 0
     with open('fund.txt', 'r', encoding='utf8') as f_in:
         rooms = []
         text = f_in.readlines()
@@ -9,15 +13,24 @@ def read_file_rooms(): # считывание комнат из файла и ф
             item.strip('\n')
             element = item.split()
             rooms.append(Room(element[0], element[1], element[2], element[3]))
+        for room in rooms:
+            if room.type == 'одноместный':
+                single += 1
+            elif room.type == 'двухместный':
+                two_place += 1
+            elif room.type == 'полулюкс':
+                half_luxe += 1
+            elif room.type == 'люкс':
+                luxe += 1
 
-    return rooms
+    return rooms, single, two_place, half_luxe, luxe
 
 
 def empty_hotel(rooms): # получаем пустой отель, где для всех номеров 31 день свободный
     occupation = {}
     for room in rooms:
         empty_days = {}
-        for day in range(1, 6):
+        for day in range(1, 32):
             empty_days[day] = 'свободно'
         occupation[room.number] = empty_days
     return Hotel(occupation)
@@ -67,40 +80,70 @@ def read_file_booking(): # считывание данных из файла п�
     return clients
 
 
-def hotel_filling(sorted_rooms, clients, hotel, rooms):
+def hotel_filling(sorted_rooms, clients, hotel, rooms, sing, two, half, lux):
     first_date_in = clients[0].date_in
     last_date_in = clients[len(clients)-1].date_in
-    start = first_date_in.split('.')[0]
-    for data in range(int(start), int(last_date_in.split('.')[0]) + 1):
-            for client in clients:
+    main_date = clients[0].date_in.split('.')[1] + '.'+ clients[0].date_in.split('.')[2]
+    for day in range(int(first_date_in.split('.')[0]), int(last_date_in.split('.')[0]) + 1):
+        count_room = 0
+        current_money = 0
+        lost_money = 0
+        single = 0
+        two_place = 0
+        half_luxe = 0
+        luxe = 0
+        for client in clients:
+            if day == int(client.date_in.split('.')[0]):
                 search_people = int(client.people) # количество людей в номер
                 search_summ = int(client.max_summ) # максимальная стоимость
                 search_date = int(client.date.split('.')[0])
                 search_days = int(client.days)
-
                 room_res = searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, client.agreement)
-                counter = 0
                 agreement = client.agreement
-                while first_date_in == client.date_in:
+                print('=' * 150, '\n', '\n')
+                print('Поступила заявка на бронирование: ', '\n', '\n')
+                print(client)
+                print('\n')
+                if room_res != 0:
+                    print('Найден:', '\n', '\n')
+                    for room in rooms:
+                        if room.number == room_res[0][0]:
+                            print(room, end='. ')
+                            room_type = room.type
+                    print('фактически', search_people, 'чел. ', room_res[0][3], ' стоимость ', room_res[0][1]*room_res[1], ' руб./сутки', '\n', '\n')
+                    if agreement:
+                        print('Клиент согласен. Номер забронирован.', '\n', '\n')
+                        count_room += 1
+                        current_money += room_res[0][1]*room_res[1] * search_people
 
-                    if room_res != 0:
-                        print('Поступила заявка на бронирование: ' + '\n')
-                        print(client)
-                        print(hotel)
-                        print('Найден:')
-                        for room in rooms:
-                            if room.number == room_res[0][0]:
-                                print(room, end='. ')
-                        print('фактически', search_people, 'чел. ', room_res[0][3], ' стоимость ', room_res[0][1]*room_res[1], ' руб./сутки')
-                        if agreement:
-                            print('Клиент согласен. Номер забронирован.')
-                        else:
-                            print('Клиент отказался!!')
-                        print(hotel)
+                        if room_type == 'одноместный':
+                            single += 1
+                        elif room_type == 'двухместный':
+                            two_place += 1
+                        elif room_type == 'полулюкс':
+                            half_luxe += 1
+                        elif room_type == 'люкс':
+                            luxe += 1
+
                     else:
-                        print('Предложений по данному запросу нет. В бронировании отказано.')
-                    counter += 1
-                    first_date_in = clients[counter].date_in
+                        print('Клиент отказался!!', '\n', '\n')
+                        lost_money += room_res[0][1]*room_res[1] * search_people
+                else:
+                    print('Предложений по данному запросу нет. В бронировании отказано.', '\n', '\n')
+                    lost_money += search_summ
+        print('=' * 150, '\n', '\n')
+        print('Итог за ' + str(day) + '.' + main_date + ':', '\n', '\n')
+        print('Кол-во занятых номеров: ', count_room, '\n', '\n')
+        print('Кол-во свободных номеров: ', len(rooms) - count_room, '\n', '\n')
+        print('Занятость по категориям: ', '\n', '\n')
+        print('Одноместных: ', single, 'из', sing, '\n', '\n')
+        print('Двуместных: ', two_place, 'из', two, '\n', '\n')
+        print('Полулюкс: ', half_luxe, 'из', half, '\n', '\n')
+        print('Люкс: ', luxe, 'из', lux, '\n', '\n')
+
+        print('Процент загруженности номеров: ', round((count_room / len(rooms) ) * 100, 2), ' %', '\n', '\n')
+        print('Доход за день: ', current_money, ' руб.', '\n', '\n')
+        print('Упущенный доход: ', lost_money, ' руб.', '\n', '\n')
 
 
 def searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, agreement, percent=1.0):
@@ -121,12 +164,12 @@ def searching(sorted_rooms, search_people, search_summ, search_date, search_days
 
 
 def main():
-    rooms = read_file_rooms() # читаем и кладем в список экземпляры комнат
-    hotel = empty_hotel(rooms) # создаем "свободный" отель
-    for_sort = food(variants(rooms), rooms) # формируем кортежи
-    sorted_rooms = sort(for_sort) # сортируем кортежи
-    clients = read_file_booking() # читаем и кладем в список экземпляры клиентов
-    hotel_filling(sorted_rooms, clients, hotel, rooms)
+    rooms, single, two_place, half_luxe, luxe = read_file_rooms()
+    hotel = empty_hotel(rooms)
+    for_sort = food(variants(rooms), rooms)
+    sorted_rooms = sort(for_sort)
+    clients = read_file_booking()
+    hotel_filling(sorted_rooms, clients, hotel, rooms, single, two_place, half_luxe, luxe)
 
-
-main()
+if __name__ == '__main__':
+    main()
