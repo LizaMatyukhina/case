@@ -34,9 +34,9 @@ class Hotel:
             return 'свободно'
 
     def taken(self, number, date, days): # метод, который занимает нужные номера
-        room = self.occupation[number]
-        for day in range (days+1):
-            room[date+day]='занято'
+        print (number)
+        for day in range(days):
+            self.occupation[number][date+day]='занято'
 
 
     def __str__(self):

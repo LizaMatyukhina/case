@@ -69,33 +69,38 @@ def read_file_booking(): # считывание данных из файла п�
 
 
 def hotel_filling(sorted_rooms, clients, hotel, rooms):
-
     for client in clients:
-        search_people = client.people # количество людей в номер
-        search_summ = client.max_summ # максимальная стоимость
+        search_people = int(client.people) # количество людей в номер
+        search_summ = int(client.max_summ) # максимальная стоимость
         search_date = int(client.date.split('.')[0])
         search_days = int(client.days)
         room_res = searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel)
         if room_res != 0:
-            print ('Найден: \n')
+            print(hotel)
+            print ('Найден:')
             for room in rooms:
-                if room.number == room_res[0]:
-                    print(room)
+                if room.number == room_res[0][0]:
+                    print(room, end = '. ')
+            print ('фактически', search_people, 'чел. ', room_res[0][3], ' стоимость ', room_res[0][1]*room_res[1], ' руб./сутки')
+        else:
+            print('Предложений по данному запросу нет. В бронировании отказано.')
 
 
 
-
-
-
-def searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel):
+def searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, percent=1.0):
     switch = 0
     for room in sorted_rooms:
-        if search_people == room[3] and search_summ>room[2]:
-            if hotel.checking(room[0], search_date) == 'занято':
-                continue
-            else:
-                switch = room
+        if search_people == room[2] and search_summ>room[1]:
+            if hotel.checking(room[0], search_date) != 'занято':
+                switch = [room, percent]
                 hotel.taken(room[0], search_date, search_days)
+                break
+
+
+    if switch == 0 and search_people < 7:
+        return searching(sorted_rooms, search_people+1, search_summ, search_date, search_days, hotel, 0.7)
+
+
     return switch
 
 
@@ -106,7 +111,7 @@ def main():
     for_sort = food(variants(rooms), rooms) # формируем кортежи
     sorted_rooms = sort(for_sort) # сортируем кортежи
     clients = read_file_booking() # читаем и кладем в список экземпляры клиентов
-
+    print(hotel)
     hotel_filling(sorted_rooms, clients, hotel, rooms)
 
     print(sorted_rooms)
