@@ -1,3 +1,6 @@
+import random
+
+
 class Room:
 
     def __init__(self, number, type, max_people, comfort):
@@ -34,13 +37,11 @@ class Hotel:
             return 'свободно'
 
     def taken(self, number, date, days): # метод, который занимает нужные номера
-        print (number)
         for day in range(days):
-            self.occupation[number][date+day]='занято'
-
+            self.occupation[number][date+day] = 'занято'
 
     def __str__(self):
-        return(str(self.occupation))
+        return str(self.occupation)
 
     def __repr__(self):
         return self.__str__()
@@ -48,11 +49,24 @@ class Hotel:
 
 class Client:
 
-    def __init__(self, name, date_in, people, date, days, max_summ):
+    def __init__(self, date_in, name, people, date, days, max_summ):
         self.name = name
         self.date_in = date_in
         self.people = people
         self.date = date
         self.days = days
         self.max_summ = max_summ
-        self.agreement = True # тут сделать рандом
+        if random.randrange(1, 4, 1) == 1:
+            self.agreement = True
+        else:
+            self.agreement = False
+
+    def __str__(self):
+        s = self.date_in + ' '
+        s += self.name + ' '
+        s += self.people + ' '
+        s += self.date + ' '
+        s += self.days + ' '
+        s += self.max_summ
+
+        return s
