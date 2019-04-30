@@ -56,10 +56,10 @@ class Client:
         self.date = date
         self.days = days
         self.max_summ = max_summ
-        if random.randrange(1, 4, 1) == 1:
-            self.agreement = True
-        else:
+        if random.randrange(1, 5) == 1:
             self.agreement = False
+        else:
+            self.agreement = True
 
     def __str__(self):
         s = self.date_in + ' '

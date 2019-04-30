@@ -14,11 +14,11 @@ def read_file_rooms(): # считывание комнат из файла и ф
 
 
 def empty_hotel(rooms): # получаем пустой отель, где для всех номеров 31 день свободный
-    empty_days = {}
-    for day in range(1, 32):
-        empty_days[day] = 'свободно'
     occupation = {}
     for room in rooms:
+        empty_days = {}
+        for day in range(1, 6):
+            empty_days[day] = 'свободно'
         occupation[room.number] = empty_days
     return Hotel(occupation)
 
@@ -73,7 +73,8 @@ def hotel_filling(sorted_rooms, clients, hotel, rooms):
         search_summ = int(client.max_summ) # максимальная стоимость
         search_date = int(client.date.split('.')[0])
         search_days = int(client.days)
-        room_res = searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel)
+        room_res = searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, client.agreement)
+        agreement = client.agreement
         if room_res != 0:
             print('Поступила заявка на бронирование: ' + '\n')
             print(client)
@@ -83,17 +84,23 @@ def hotel_filling(sorted_rooms, clients, hotel, rooms):
                 if room.number == room_res[0][0]:
                     print(room, end='. ')
             print('фактически', search_people, 'чел. ', room_res[0][3], ' стоимость ', room_res[0][1]*room_res[1], ' руб./сутки')
+            if agreement:
+                print('Клиент согласен. Номер забронирован.')
+            else:
+                print('Клиент отказался!!')
+            print(hotel)
         else:
             print('Предложений по данному запросу нет. В бронировании отказано.')
 
 
-def searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, percent=1.0):
+def searching(sorted_rooms, search_people, search_summ, search_date, search_days, hotel, agreement, percent=1.0):
     switch = 0
     for room in sorted_rooms:
         if search_people == room[2] and search_summ > room[1]:
             if hotel.checking(room[0], search_date) != 'занято':
                 switch = [room, percent]
-                hotel.taken(room[0], search_date, search_days)
+                if agreement:
+                    hotel.taken(room[0], search_date, search_days)
                 break
 
     if switch == 0 and search_people < 7:
@@ -109,10 +116,8 @@ def main():
     for_sort = food(variants(rooms), rooms) # формируем кортежи
     sorted_rooms = sort(for_sort) # сортируем кортежи
     clients = read_file_booking() # читаем и кладем в список экземпляры клиентов
-    print(hotel)
     hotel_filling(sorted_rooms, clients, hotel, rooms)
 
     print(sorted_rooms)
-    print(hotel)
 
 main()
